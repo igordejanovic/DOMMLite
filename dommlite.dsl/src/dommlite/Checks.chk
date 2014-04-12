@@ -1,0 +1,187 @@
+import dommlite;
+
+extension dommlite::Extensions;
+/*
+ * This check file is used by the parser
+ * and by the editor. Add your constraints here!
+ */
+
+context ConstraintType ERROR "Write your constraint message here...!" :
+   true;
+
+context ConstraintSpec ERROR "Write your constraint message here...!" :
+   true;
+
+context Entity ERROR "Write your constraint message here...!" :
+   true;
+
+context Service ERROR "Write your constraint message here...!" :
+   true;
+
+context ConstraintParameter ERROR "Write your constraint message here...!" :
+   true;
+
+context Enumeration ERROR "Write your constraint message here...!" :
+   true;
+
+context UserValidatorType ERROR "Write your constraint message here...!" :
+   true;
+
+context ValidatorType ERROR "Write your constraint message here...!" :
+   true;
+
+context Package ERROR "Write your constraint message here...!" :
+   true;
+
+context FeatureCompartment ERROR "Write your constraint message here...!" :
+   true;
+
+context Property ERROR "Write your constraint message here...!" :
+   true;
+
+context DataType ERROR "Write your constraint message here...!" :
+   true;
+
+context ReprParameterRef ERROR "Write your constraint message here...!" :
+   true;
+
+context OperationCompartment ERROR "Write your constraint message here...!" :
+   true;
+
+context TypedElement ERROR "Write your constraint message here...!" :
+   true;
+
+context PackageElement ERROR "Write your constraint message here...!" :
+   true;
+
+context UserTagType ERROR "Write your constraint message here...!" :
+   true;
+
+context ReprParameter ERROR "Write your constraint message here...!" :
+   true;
+
+context BuildInDataType ERROR "Write your constraint message here...!" :
+   true;
+
+context Exception ERROR "Write your constraint message here...!" :
+   true;
+
+context ReprParameterStr ERROR "Write your constraint message here...!" :
+   true;
+
+context NamedElement ERROR "Write your constraint message here...!" :
+   true;
+
+context ConstraintIntParameter ERROR "Write your constraint message here...!" :
+   true;
+
+context ValueObject ERROR "Write your constraint message here...!" :
+   true;
+
+context DOMMLiteModel ERROR "Write your constraint message here...!" :
+   true;
+
+context EnumerationLiteral ERROR "Write your constraint message here...!" :
+   true;
+
+context Parameter ERROR "Write your constraint message here...!" :
+   true;
+
+context ConstraintRefParameter ERROR "Write your constraint message here...!" :
+   true;
+
+context Classifier ERROR "Write your constraint message here...!" :
+   true;
+
+context Feature ERROR "Write your constraint message here...!" :
+   true;
+
+context TagType ERROR "Write your constraint message here...!" :
+   true;
+
+context Operation ERROR "Write your constraint message here...!" :
+   true;
+
+context ConstraintStrParameter ERROR "Write your constraint message here...!" :
+   true;
+
+context BuildInTagType ERROR "Write your constraint message here...!" :
+   true;
+
+context UserDataType ERROR "Write your constraint message here...!" :
+   true;
+
+context Identifier ERROR "Write your constraint message here...!" :
+   true;
+
+context BuildInValidatorType ERROR "Write your constraint message here...!" :
+   true;
+
+context ConstraintSpec ERROR "Constraint " + type.name + " takes " + type.parameters.size + " arguments and you supplied " + parameters.size :
+	type.parameters.exists(e|e.toString()=="ellipsis") || type.parameters.size==parameters.size
+;
+
+context ConstraintSpec ERROR "Constraint " + type.name + " is not applicable to this model element!" :
+	(eContainer.metaType==Entity && type.appliesToEntity) ||
+	(eContainer.metaType==Service && type.appliesToService) ||
+	(eContainer.metaType==Property && type.appliesToProperty) ||
+	(eContainer.metaType==Operation && type.appliesToOperation) ||
+	(eContainer.metaType==Parameter && type.appliesToParameter) ||
+	(eContainer.metaType==ValueObject && type.appliesToValueObject)
+;
+
+context ConstraintType ERROR "If parameter number is undefined decl must have 1 or 2 parameters and last one must be ellipsis!" :
+	  parameters.notExists(e|e.toString()=="ellipsis") || ( parameters.size<=2 && parameters.last().toString()=="ellipsis")
+;
+
+
+/*
+	Provera da li su svi parametri istog tipa ukoliko je specifikacija ograničenja sa neodređenim brojem parametara istog tipa
+*/
+context ConstraintSpec ERROR "Type error for constraint " + type.name + ". All parameters must be of type " +
+		type.parameters.get(0).toString() :
+		type.parameters.size!=2 || type.parameters.last().toString()!="ellipsis" ||
+			( parameters.size>0 &&
+			( (type.parameters.get(0).toString()=="int" && parameters.forAll(e|e.metaType==ConstraintIntParameter)) ||
+			  (type.parameters.get(0).toString()=="string" && parameters.forAll(e|e.metaType==ConstraintStrParameter)) ||
+			  (type.parameters.get(0).toString()=="ref" && parameters.forAll(e|e.metaType==ConstraintRefParameter))
+			))
+			   
+;		
+
+/*
+	Provera da li parametar po tipu odgovara specifikaciji
+*/
+
+context ConstraintParameter ERROR "Type error for parameter " + 
+		(metaType==ConstraintIntParameter ? ((ConstraintIntParameter)this).paramValue :
+			(metaType==ConstraintStrParameter ? ((ConstraintStrParameter)this).paramValue :
+			(metaType==ConstraintRefParameter ? ((ConstraintRefParameter)this).paramValue.name :
+			"!!! unknown parameter type !!!"
+		))) :
+		
+		let constTypeParams = ((ConstraintSpec)eContainer).type.parameters :		
+			constTypeParams.size==0 || constTypeParams.last().toString()=="ellipsis" ||
+			(  (constTypeParams.get(((ConstraintSpec)eContainer).parameters.indexOf(this)).toString()=="int" && 
+							this.metaType==ConstraintIntParameter) ||
+			   (constTypeParams.get(((ConstraintSpec)eContainer).parameters.indexOf(this)).toString()=="string" && 
+			   				this.metaType==ConstraintStrParameter) ||
+			   (constTypeParams.get(((ConstraintSpec)eContainer).parameters.indexOf(this)).toString()=="ref" && 
+			   				this.metaType==ConstraintRefParameter) 
+			)
+			
+;
+
+context ConstraintParameter ERROR 
+	"Refered attribute " + ((ConstraintRefParameter)this).paramValue.name + 
+		" does not belong to containing classifier! " :
+		true			
+;
+
+context Operation ERROR "Finder method must return entity or entities collection." :
+	constraints.exists(e|e.type.name=='finder') ?
+	type.metaType == Entity : true
+;
+
+context EnumerationLiteral ERROR "Literal value length must be 1" :
+   value==null || value.length==1;

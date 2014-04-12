@@ -1,0 +1,57 @@
+«IMPORT dommlite»
+
+«IMPORT dommlite::django» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	Generisanje klasa modela
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/services/__init__.py"-»
+	«ENDFILE»
+	«EXPAND element FOREACH packages-»
+«ENDDEFINE»
+
+«DEFINE element FOR Package-»
+	«EXPAND element FOREACH packageElements.typeSelect(Package)-»
+	«EXPAND element FOREACH packageElements.typeSelect(Service)-»
+«ENDDEFINE»
+
+«DEFINE element FOR PackageElement»
+«ENDDEFINE»
+
+«DEFINE element FOR Service»
+	«FILE appName()+"/services/"+serviceFileName()-»
+# coding: UTF-8
+# This file is generated only once. Here you should define your service methods manualy.
+# Service «name»
+# Generated on «dateAndTime()» from ServicesSrc templates
+# ------------------- Service  «name»  ---------------------------
+
+from «appName()»_gen.services import «serviceName()»
+from dommlite import service_registry
+
+«serviceName()»_service = service_registry.get_service('«serviceName()»')
+
+	«EXPAND ServiceOperationSrc FOREACH operations-» 
+	«EXPAND compartment FOREACH operationCompartmens-»
+	«ENDFILE»
+«ENDDEFINE»
+
+
+«DEFINE ServiceOperationSrc FOR Operation»
+
+	«EXPAND Operations::operation»
+
+«containingServiceName()»_service.get_function('«name»')['function'] = «name»
+		
+«ENDDEFINE»
+
+«DEFINE compartment FOR OperationCompartment»
+# --------------    Start of operation compartment «name»    -----------------------------------
+	«EXPAND ServiceOperationSrc FOREACH operations»
+# --------------    End of operation compartment «name»    -----------------------------------
+«ENDDEFINE»
+

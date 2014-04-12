@@ -1,0 +1,50 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/models_src/__init__.py"»
+	«ENDFILE»
+	«EXPAND element FOREACH packages»
+	«FILE appName()+"/models_src/post_models_load.py"»
+# coding: UTF-8
+# This file will be imported after all models file.
+# Generated on «dateAndTime()» from ModelsSrc template
+
+	«ENDFILE»
+«ENDDEFINE»
+
+«DEFINE element FOR Package-»
+	«EXPAND element FOREACH packageElements.typeSelect(Package)»
+	«EXPAND element FOREACH packageElements.typeSelect(Entity)»
+«ENDDEFINE»
+
+«DEFINE element FOR PackageElement»
+«ENDDEFINE»
+
+«DEFINE element FOR Entity»
+	«FILE appName()+"/models_src/"+modelFileName()-»
+# coding: UTF-8
+# This file is generated only once
+# Here you can overide generated model.
+# Example: Changing model bussiness method 
+# form app_name.models_gen import ModelName
+# def some_method(self, param1):
+# 	...implementation
+# ModelName.some_method = some_method
+#
+# Generated on «dateAndTime()» from ModelsSrc template
+
+from django.db import models
+from «appName()».models_gen import «name» 
+
+	«EXPAND operation FOREACH allOperations()»
+	«ENDFILE»
+«ENDDEFINE»
+
+
+«DEFINE operation FOR Operation-»
+	«EXPAND Operations::operation»
+«containingEntityName()».«name» = «name»
+«ENDDEFINE»	

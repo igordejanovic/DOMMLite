@@ -1,0 +1,236 @@
+import dommlite;
+
+extension dommlite::GenExtensions reexport;
+extension dommlite::BuildIn;
+extension org::openarchitectureware::util::stdlib::io;
+
+/*
+ * This extension file is intended to be used for defining
+ * general extensions for the domain model.
+ * It inherits generated extensions from GenExtensions.
+ * You can overwrite or specialize them here
+ */
+ 
+emf::EObject owner(emf::EObject this) :
+	this.eContainer
+;
+	
+
+
+Void injectBuildIns(emf::EObject this) :
+	this.eRootContainer.eAllContents.typeSelect(Package).notExists(e|e.name=="buildIn") ? 
+//		"Injecting primitives".syserr()->
+		((DOMMLiteModel)this.eRootContainer).packages.add(createBuildIns()) : 
+	//	"Prolazim".syserr()->
+		null;	
+
+cached Collection[dommlite::Entity] allEntities(dommlite::Package p) :
+	p.packageElements.typeSelect(dommlite::Entity).union(p.packageElements.typeSelect(dommlite::Package).allEntities())
+;
+
+cached Collection[dommlite::Entity] allEntities(dommlite::DOMMLiteModel this) :
+	this.packages.packageElements.typeSelect(dommlite::Entity).union(this.packages.packageElements.typeSelect(dommlite::Package).allEntities())
+;
+
+
+cached String shortDescOrName(dommlite::NamedElement this) :
+	shortDesc == null ? name : shortDesc
+;
+
+cached Collection[dommlite::Entity] allEntities(dommlite::NamedElement this) :
+	let m = ((dommlite::DOMMLiteModel)this.eRootContainer) :
+	m.packages.allEntities()
+;
+
+
+cached Collection[dommlite::Feature] allFeatures(dommlite::Entity e) :
+	e.features.union(e.featureCompartments.features)
+;
+
+
+cached Collection[Property] properties(Entity e) :
+	e.features.typeSelect(Property)
+;
+
+cached Collection[Property] properties(FeatureCompartment e) :
+	e.features.typeSelect(Property)
+;
+
+cached Collection[Property] allReferences(Entity this) :
+	this.eContents.typeSelect(Property).select(e|e.isReference())
+;
+
+
+// Returns all constraints object assigned to entity
+cached Collection[ConstraintSpec] allConstraints(Entity this) :
+	constraints.select(e|TagType.isAssignableFrom(e.type.metaType))
+;
+
+// Returns all constraints object assigned to typed element
+cached Collection[ConstraintSpec] allConstraints(TypedElement this) :
+	constraints.select(e|ConstraintType.isAssignableFrom(e.type.metaType))
+;
+
+/*
+cached Collection[ConstraintSpec] allMetaInfo(Entity e) :
+	e.constraints.select(e|ValidatorType.isAssignableFrom(e.type.metaType))
+;
+*/
+
+cached Boolean hasTag(Property this, String tagName):
+	allConstraints().exists(e|e.type.name == tagName)
+;
+
+
+cached List[Property] allProperties(Entity e) :
+	e.features.typeSelect(Property).union(e.featureCompartments.features.typeSelect(Property))
+;
+
+cached List[Property] allPropertiesWithKeyFields(Entity e) :
+	e.key.properties.union(e.features.typeSelect(Property).union(e.featureCompartments.features.typeSelect(Property)))
+;
+
+cached List[Property] allOtherSideReferenceProperties(Entity this):
+	eRootContainer.eAllContents.typeSelect(Property).select(e|e.type==this && containingEntity(e)!=this)
+;
+
+
+cached Collection[Operation] allOperations(Entity e) :
+	e.features.typeSelect(Operation).union(e.featureCompartments.features.typeSelect(Operation))
+;
+
+
+cached Classifier containingClassifier(emf::EObject this) :
+    eContainer == null ? null :
+	(Classifier.isAssignableFrom(eContainer.metaType) ?
+		eContainer:	
+		eContainer.containingClassifier() 
+	)
+;
+
+
+cached dommlite::Entity containingEntity(dommlite::Feature this) :
+	let m = ((dommlite::DOMMLiteModel)this.eRootContainer) :
+	m.packages.allEntities().select(e|e.allFeatures().contains(this))
+;
+
+/*
+Collection[DOMMLite::Property] fullyQualifiedBussinesKey(DOMMLite::Entity e):
+	e.key.properties.union(e.
+;
+*/
+
+cached Collection[dommlite::Property] allPrimitiveProperties(dommlite::Entity e):
+	(e.allProperties().select(p|p.isPrimitive()))
+;
+
+cached Collection[dommlite::Property] allPrimitiveProperties(dommlite::FeatureCompartment e):
+	(e.allProperties().select(p|p.isPrimitive()))
+;
+
+
+emf::EObject owner(emf::EObject this) :
+	((emf::EObject)this).eContainer
+;
+
+dommlite::NamedElement owner(dommlite::NamedElement this) :
+	((emf::EObject)this).eContainer
+;
+	
+
+isPrimitive(dommlite::Property this):
+	dommlite::DataType.isAssignableFrom(type.metaType)
+;
+
+isReference(dommlite::Property this):
+	!isPrimitive()
+;
+
+Boolean isOneToOne(dommlite::Property this):
+	isReference() && !many && oppositeEnd!=null && !oppositeEnd.many 
+;
+
+Boolean isManyToMany(dommlite::Property this):
+	isBidirectionalReference() && many && oppositeEnd().many 
+;
+
+Boolean isOneToMany(dommlite::Property this):
+	isReference() && !isOneToOne() && !isManyToMany()
+;
+
+
+
+cached isBidirectionalReference(dommlite::Property this):
+	oppositeEnd!=null || type.eContents.typeSelect(Property).exists(e|e.oppositeEnd==this && containingEntity(e)==type)
+;
+
+Property oppositeEnd(dommlite::Property this):
+	oppositeEnd!=null ? oppositeEnd :
+		type.eAllContents.typeSelect(Property).selectFirst(e|e.oppositeEnd==this)
+;
+
+
+cached Entity containingEntity(dommlite::Property this):
+	owner()==null ? null : (owner().metaType==dommlite::Entity ? ((Entity)(owner())) : ((Entity)(owner().owner())));
+
+String containingEntityName(dommlite::Property this):
+	containingEntity().name;
+
+String containingEntityName(dommlite::Operation f):
+	f.owner()==null ? "" : (f.owner().metaType==dommlite::Entity ? f.owner().name : f.owner().owner().name);
+
+Service containingService(dommlite::Operation f):
+	f.owner()==null ? null : (f.owner().metaType==dommlite::Service ? f.owner() : f.owner().owner());
+
+String containingServiceName(dommlite::Operation f):
+	f.owner()==null ? "" : (f.owner().metaType==dommlite::Entity ? f.owner().name : f.owner().owner().name);
+
+allOperations(dommlite::FeatureCompartment this):
+	this.features.typeSelect(dommlite::Operation)
+;
+
+allProperties(dommlite::FeatureCompartment this):
+	this.features.typeSelect(dommlite::Property)
+;
+
+allOperations(dommlite::Entity e) :
+	e.features.typeSelect(dommlite::Operation).union(e.featureCompartments.allOperations())
+;
+
+allProperties(dommlite::Entity e) :
+	e.features.typeSelect(dommlite::Property).union(e.featureCompartments.allProperties())
+;
+
+allStringLikeProperties(Collection[Property] this):
+	select(e|e.type.name=="string" || e.type.name=="char")
+;
+
+
+Collection[dommlite::ValueObject] allValueObjects(dommlite::Entity e):
+	Collection[dommlite::ValueObject]
+;
+
+Collection[dommlite::Entity] allEntities(dommlite::DOMMLiteModel m) :
+	m.packages.allEntities()
+// Može i ovako sa samo jednom funkcijom ali kolekcija nije sortirana  po paketima
+//	m.packages.packageElements.typeSelect(dommlite::Entity).union(m.packages.packageElements.typeSelect(dommlite::Package).allEntities())
+
+;
+
+Collection[dommlite::Entity] allEntities(dommlite::Package p) :
+	p.packageElements.typeSelect(dommlite::Entity).union(p.packageElements.typeSelect(dommlite::Package).allEntities())
+;
+
+Collection[dommlite::Service] allServices(dommlite::DOMMLiteModel m) :
+	m.packages.allServices()
+;
+
+Collection[dommlite::Service] allServices(dommlite::Package p) :
+	p.packageElements.typeSelect(dommlite::Service).union(p.packageElements.typeSelect(dommlite::Package).allServices())
+;
+
+
+Collection[dommlite::Entity] referencedEntities(dommlite::Service s) :
+	s.operations.parameters.type.union(s.operations.type).typeSelect(dommlite::Entity)
+;
+ 

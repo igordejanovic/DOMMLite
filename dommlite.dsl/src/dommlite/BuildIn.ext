@@ -1,0 +1,359 @@
+import dommlite;
+
+extension org::openarchitectureware::util::stdlib::io;
+
+create Package p createBuildIns():
+	p.setName("builtIn") ->
+	p.packageElements.add(createBuildInTypes()) ->
+	p.packageElements.add(createBuildInMetaInfo()) ->
+	p.packageElements.add(createBuildInValidators())
+;
+
+create Package p createBuildInTypes():
+	p.setName("types") ->
+	p.packageElements.add(createString())->
+	p.packageElements.add(createChar())->
+	p.packageElements.add(createInt())->
+	p.packageElements.add(createBool())->
+	p.packageElements.add(createReal())->
+	p.packageElements.add(createDateTime())->
+	p.packageElements.add(createDate())->
+	p.packageElements.add(createMoney())->
+	p.packageElements.add(createVoid())
+;
+
+create Package p createBuildInValidators():
+	p.setName("validators") ->
+
+	p.packageElements.add(createIsAlphaNumeric()) ->
+	p.packageElements.add(createIsLowerCase()) ->
+	p.packageElements.add(createIsUpperCase()) ->
+	p.packageElements.add(createIsCommaSeparatedIntegerList()) ->
+	p.packageElements.add(createIsCommaSeparatedEmailList()) ->
+	p.packageElements.add(createIsOnlyDigits()) ->
+	p.packageElements.add(createIsNotOnlyDigits()) ->
+	p.packageElements.add(createIsOnlyLetters()) ->
+	p.packageElements.add(createIsValidEmail()) ->
+	p.packageElements.add(createIsValidImage()) ->
+	p.packageElements.add(createIsValidImageURL()) ->
+	p.packageElements.add(createIsValidURL()) ->
+	p.packageElements.add(createIsValidHTML()) ->
+	p.packageElements.add(createIsWellFormedXml()) ->
+	p.packageElements.add(createIsWellFormedXmlFragment()) ->
+	p.packageElements.add(createIsExistingURL()) ->
+	p.packageElements.add(createIsGreaterThanInt()) ->
+	p.packageElements.add(createIsLessThanInt()) ->
+	p.packageElements.add(createIsGreaterOrEqualThanInt()) ->
+	p.packageElements.add(createIsLessOrEqualThanInt()) ->
+	p.packageElements.add(createIsBetweenIntsInclusive()) ->
+	p.packageElements.add(createIsBetweenIntsExclusive()) ->
+	p.packageElements.add(createIsGreaterThanRef()) ->
+	p.packageElements.add(createIsLessThanRef()) ->
+	p.packageElements.add(createIsGreaterOrEqualThanRef()) ->
+	p.packageElements.add(createIsLessOrEqualThanRef()) ->
+	p.packageElements.add(createIsBetweenRefsInclusive()) ->
+	p.packageElements.add(createIsBetweenRefsExclusive())->
+
+	p.packageElements.add(createNotEmptyIfRefsNotEmpty())->
+	p.packageElements.add(createEmptyIfRefsNotEmpty())->
+	p.packageElements.add(createNotEmptyIfRefsEmpty())->
+	p.packageElements.add(createEmptyIfRefsEmpty()) ->
+	p.packageElements.add(createMatchesRegularExpression())
+;
+
+create Package p createBuildInMetaInfo():
+	p.setName("tags") ->
+	p.packageElements.add(createPlural())->
+	p.packageElements.add(createSearchBy())->
+	p.packageElements.add(createOrderBy())->
+	p.packageElements.add(createListFields())->
+	p.packageElements.add(createFilterFields())->
+	p.packageElements.add(createUniqueTogether())->
+	p.packageElements.add(createFinder()) ->
+	p.packageElements.add(createGreaterEqual()) ->
+	p.packageElements.add(createGreaterThan()) ->
+	p.packageElements.add(createLessEqual()) ->
+	p.packageElements.add(createLessThan())
+;
+
+
+// ------------    TYPES  ------------------------
+create BuildInDataType d createString():d.setName("string");
+create BuildInDataType d createChar():d.setName("char");
+create BuildInDataType d createInt():d.setName("int");
+create BuildInDataType d createBool():d.setName("bool");
+create BuildInDataType d createReal():d.setName("real");
+create BuildInDataType d createDateTime():d.setName("datetime");
+create BuildInDataType d createDate():d.setName("date");
+create BuildInDataType d createMoney():d.setName("money");
+create BuildInDataType d createVoid():d.setName("void");
+
+// -------------------   VALIDATORS  ---------------------
+create BuildInValidatorType d createIsAlphaNumeric():
+	d.setName("isAlphaNumeric")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsLowerCase():
+	d.setName("isLowerCase")->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsUpperCase():
+	d.setName("isUpperCase")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsCommaSeparatedIntegerList():
+	d.setName("isCommaSeparatedIntegerList")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsCommaSeparatedEmailList():
+	d.setName("isCommaSeparatedEmailList")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsOnlyDigits():
+	d.setName("isOnlyDigits")->
+	d.setAppliesToProperty(true)
+;
+
+
+create BuildInValidatorType d createIsNotOnlyDigits():
+	d.setName("isNotOnlyDigits")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsOnlyLetters():
+	d.setName("isOnlyLetters")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsValidEmail():
+	d.setName("isValidEmail")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsValidImage():
+	d.setName("isValidImage")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsValidImageURL():
+	d.setName("isValidImageURL")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsValidURL():
+	d.setName("isValidURL")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsValidHTML():
+	d.setName("isValidHTML")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsWellFormedXml():
+	d.setName("isWellFormedXml")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsWellFormedXmlFragment():
+	d.setName("isWellFormedXmlFragment")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsExistingURL():
+	d.setName("isExistingURL")->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsGreaterThanInt():
+	d.setName("isGreaterThanInt")->
+	d.parameters.add(createIntTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsLessThanInt():
+	d.setName("isLessThanInt")->
+	d.parameters.add(createIntTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsGreaterOrEqualThanInt():
+	d.setName("isGreaterOrEqualThanInt")->
+	d.parameters.add(createIntTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsLessOrEqualThanInt():
+	d.setName("isLessOrEqualThanInt")->
+	d.parameters.add(createIntTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createIsBetweenIntsInclusive():
+	d.setName("isBetweenIntsInclusive")->
+	d.parameters.add(createIntTypeParameter())->
+	d.parameters.add(createIntTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsBetweenIntsExclusive():
+	d.setName("isBetweenIntsExclusive")->
+	d.parameters.add(createIntTypeParameter())->
+	d.parameters.add(createIntTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsGreaterThanRef():
+	d.setName("isGreaterThanRef")->
+	d.parameters.add(createRefTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsLessThanRef():
+	d.setName("isLessThanRef")->
+	d.parameters.add(createRefTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsGreaterOrEqualThanRef():
+	d.setName("isGreaterOrEqualThanRef")->
+	d.parameters.add(createRefTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsLessOrEqualThanRef():
+	d.setName("isLessOrEquealThanRef")->
+	d.parameters.add(createRefTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsBetweenRefsInclusive():
+	d.setName("isBetweenRefsInclusive")->
+	d.parameters.add(createRefTypeParameter())->
+	d.parameters.add(createRefTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createIsBetweenRefsExclusive():
+	d.setName("isBetweenRefsExclusive")->
+	d.parameters.add(createRefTypeParameter())->
+	d.parameters.add(createRefTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createNotEmptyIfRefsNotEmpty():
+	d.setName("notEmptyIfRefsNotEmpty")->
+	d.parameters.add(createRefTypeParameter())->
+	d.parameters.add(createEclipsisTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createEmptyIfRefsNotEmpty():
+	d.setName("emptyIfRefsNotEmpty")->
+	d.parameters.add(createRefTypeParameter())->
+	d.parameters.add(createEclipsisTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createNotEmptyIfRefsEmpty():
+	d.setName("notEmptyIfRefsEmpty")->
+	d.parameters.add(createRefTypeParameter())->
+	d.parameters.add(createEclipsisTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+create BuildInValidatorType d createEmptyIfRefsEmpty():
+	d.setName("emptyIfRefsEmpty")->
+	d.parameters.add(createRefTypeParameter())->
+	d.parameters.add(createEclipsisTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+
+create BuildInValidatorType d createMatchesRegularExpression():
+	d.setName("matchesRegularExpression")->
+	d.parameters.add(createStringTypeParameter())->
+	d.setAppliesToProperty(true)
+;
+
+
+// -------------------   TAGS  ---------------------
+create BuildInTagType d createPlural():
+//	"Creating plural".syserr() ->
+	d.setName("plural") ->
+	d.parameters.add(createStringTypeParameter()) ->
+	d.setAppliesToEntity(true) ->
+	d.setAppliesToValueObject(true)
+;
+create BuildInTagType d createSearchBy():
+//	"Creating searchBy".syserr() ->
+	d.setName("searchBy") ->
+	d.parameters.add(createRefTypeParameter()) ->
+	d.parameters.add(createEclipsisTypeParameter()) ->
+	d.setAppliesToEntity(true)
+;
+create BuildInTagType d createOrderBy():
+//	"Creating orderBy".syserr() ->
+	d.setName("orderBy") ->
+	d.parameters.add(createEclipsisTypeParameter()) ->
+	d.setAppliesToEntity(true)
+;
+
+create BuildInTagType d createListFields():
+//	"Creating listFields".syserr() ->
+	d.setName("listFields") ->
+	d.parameters.add(createRefTypeParameter()) ->
+	d.parameters.add(createEclipsisTypeParameter()) ->
+	d.setAppliesToEntity(true)
+;
+
+create BuildInTagType d createFilterFields():
+//	"Creating filterFields".syserr() ->
+	d.setName("filterFields") ->
+	d.parameters.add(createRefTypeParameter()) ->
+	d.parameters.add(createEclipsisTypeParameter()) ->
+	d.setAppliesToEntity(true)
+;
+
+create BuildInTagType d createUniqueTogether():
+//	"Creating uniqueTogether".syserr() ->
+	d.setName("uniqueTogether") ->
+	d.parameters.add(createRefTypeParameter()) ->
+	d.parameters.add(createEclipsisTypeParameter()) ->
+	d.setAppliesToEntity(true)
+;
+
+create BuildInTagType d createFinder():
+	d.setName("finder") ->
+	d.setAppliesToOperation(true)
+;
+
+create BuildInTagType d createGreaterEqual():
+	d.setName("greaterEqual") ->
+	d.setAppliesToParameter(true)
+;
+
+create BuildInTagType d createGreaterThan():
+	d.setName("greaterThan") ->
+	d.setAppliesToParameter(true)
+;
+
+create BuildInTagType d createLessEqual():
+	d.setName("lessEqual") ->
+	d.setAppliesToParameter(true)
+;
+
+create BuildInTagType d createLessThan():
+	d.setName("lessThan") ->
+	d.setAppliesToParameter(true)
+;
+
+
+ConstraintTypeParameter createStringTypeParameter():
+	let c = "string" : 
+		c
+;
+
+ConstraintTypeParameter createIntTypeParameter():
+	let c = "int" :
+		c
+;
+ 
+ConstraintTypeParameter createRefTypeParameter(): 
+	let c = "ref" :
+		c
+;
+ConstraintTypeParameter createEclipsisTypeParameter(): 
+	let c = "ellipsis" :
+		c
+;

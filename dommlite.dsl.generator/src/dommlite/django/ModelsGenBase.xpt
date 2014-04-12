@@ -1,0 +1,135 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	Generisanje klasa modela
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/models_gen.py"-»
+# coding: UTF-8
+# WARRNING: This file is generated. DO NOT EDIT! 
+# Generated on «dateAndTime()» from ModelsGenBase templates
+
+from django.db import models
+from «appName()» import custom_fields
+	«EXPAND element FOREACH packages»
+	«ENDFILE»
+«ENDDEFINE»
+
+«DEFINE element FOR Package-»
+	«EXPAND element FOREACH packageElements.typeSelect(Package)»
+	«EXPAND element FOREACH packageElements.typeSelect(Enumeration)»
+	«EXPAND element FOREACH packageElements.typeSelect(Entity)»
+«ENDDEFINE»
+
+«DEFINE element FOR PackageElement»
+«ENDDEFINE»
+
+
+«DEFINE element FOR Enumeration»
+«name.toUpperCase()»_CHOICE = (
+	«EXPAND enumLiterals FOREACH literals-»
+)
+«ENDDEFINE»
+
+«DEFINE enumLiterals FOR EnumerationLiteral-»
+	('«value»','«IF shortDesc!=null»«shortDesc»«ELSE»«name»«ENDIF»'),
+«ENDDEFINE»
+
+
+«DEFINE element FOR Entity»
+class «name»(models.Model):
+	# ----------------------------------- Identifier -----------------------------------
+	«EXPAND property FOREACH key.properties-»
+	# ----------------------------------------------------------------------------------
+	
+	«EXPAND property FOREACH properties().select(e|!e.isReference())-»
+	«EXPAND compartment FOREACH featureCompartments-»
+	«EXPAND Operations::operationTabulated FOREACH allOperations()-» 
+	«EXPAND references-»
+    «IF repr.size>0 || allProperties().allStringLikeProperties().size>0-»
+	def __unicode__(self):
+		«IF repr.size>0-»
+		return u"«FOREACH repr AS r»«IF r.metaType==ReprParameterRef»%s«ELSE»«((ReprParameterRef)r).paramValue»«ENDIF»«ENDFOREACH»" % («FOREACH repr AS r»«IF r.metaType==ReprParameterRef»self.«((ReprParameterRef)r).paramValue.name»,«ENDIF»«ENDFOREACH»)
+		«ELSE-»
+		return self.«allProperties().allStringLikeProperties().selectFirst(e|true).name»
+		«ENDIF-»
+	«ENDIF-»
+    
+	class Meta:
+		«verbose_name()»
+		«IF allConstraints().exists(e|e.type.name=="plural")-»
+		verbose_name_plural = u"«((ConstraintStrParameter)(this.allConstraints().selectFirst(e|e.type.name=="plural").parameters.get(0))).paramValue.toFirstLower().escape()»"
+		«ENDIF-»
+		«IF allConstraints().exists(e|e.type.name=="uniqueTogether") || containmentReferenceName()!=null || key.properties.size>1-»
+		unique_together = («uniqueTogetherFieldNames()», «EXPAND uniqueTogether FOREACH allConstraints().select(e|e.type.name=="uniqueTogether") SEPARATOR ','»)
+		«ENDIF-»
+		«IF allConstraints().exists(e|e.type.name=="orderBy")-»
+		ordering = [ «EXPAND ordering FOR allConstraints().selectFirst(e|e.type.name=="orderBy")» ]
+		«ENDIF-»
+		«IF allConstraints().exists(e|e.type.name=="akuzativ")-»
+		custom = { "akuzativ" : u"«((ConstraintStrParameter)(this.allConstraints().selectFirst(e|e.type.name=="akuzativ").parameters.get(0))).paramValue.toFirstLower()»" }
+		«ENDIF-»
+
+«ENDDEFINE»
+
+«DEFINE property FOR Property-»
+	«IF type.metaType==dommlite::Enumeration-»
+	«name» = models.CharField(«verbose_name()»,
+            max_length=1, 
+            choices=«type.name.toUpperCase()»_CHOICE,
+            db_index=True,
+            default=«type.name.toUpperCase()»_CHOICE[0][0]«fieldParameters()»
+	)
+	«ELSE-»
+	«name» = «IF type.metaType==UserDataType»custom_fields«ELSE»models«ENDIF».«toDjangoField()»«IF type.metaType==UserDataType»Field«ENDIF»(«verbose_name()»«fieldParameters()»)
+	«ENDIF-»
+«ENDDEFINE»	
+
+
+«DEFINE references FOR Entity-»
+	«FOREACH allReferences() AS reference-»
+		«IF reference.isManyToMany() && !reference.hasTag('dj_thisSide') && !reference.oppositeEnd().hasTag('dj_thisSide')-»
+		ERROR: «reference.name» - ManyToMany reference without dj_thisSide tag
+		«ENDIF»
+	«ENDFOREACH»
+	«EXPAND thisSideReferences FOREACH allThisSideReferenceFields()-»
+	«EXPAND otherSideReferences FOREACH allOtherSideReferenceFields()-»
+«ENDDEFINE»
+
+«DEFINE thisSideReferences FOR Property-»
+ 	# This side Reference «type.name».«name» 
+	«IF isOneToMany()-»
+	«name» = models.ForeignKey('«type.name»',«verbose_name()»«related_name()»«fieldParameters()»)
+	«ELSEIF isManyToMany()-»
+	«name» = models.ManyToManyField('«type.name»',«verbose_name()»«related_name()»«fieldParameters()»)
+	«ELSEIF isOneToOne()-»
+	Greska: Veza jedan-na-jedan nije podržana ( «type.name»  «name» )
+	«ELSE-»
+	Greska: Tip veze nije podržan ( «type.name»  «name» )
+	«ENDIF-»	
+«ENDDEFINE»
+
+«DEFINE otherSideReferences FOR Property-»
+ 	# Other side Reference «containingEntity().name».«name» 
+	«otherSideFieldName()» = models.ForeignKey('«containingEntity().name»',verbose_name='«containingEntity().shortDesc.toFirstLower()»', related_name='«name»'«fieldParametersOtherSide()»)
+«ENDDEFINE»
+
+«DEFINE compartment FOR FeatureCompartment»
+	# -----------------------------------    Compartment «name»    -----------------------------------
+	«EXPAND property FOREACH properties().select(e|!e.isReference())-»
+«ENDDEFINE»
+
+«DEFINE ordering FOR ConstraintSpec-»
+«FOREACH parameters AS p ITERATOR iter -»
+«IF p.metaType==ConstraintRefParameter-»
+'«IF ((ConstraintStrParameter)parameters.get((iter.counter0)+1)).metaType==ConstraintStrParameter && ((ConstraintStrParameter)parameters.get((iter.counter0)+1)).paramValue=="desc"-»-«ENDIF»«((ConstraintRefParameter)p).paramValue.name»', «""-»
+«ENDIF-»
+«ENDFOREACH-»
+«ENDDEFINE»
+
+«DEFINE uniqueTogether FOR ConstraintSpec-»
+(«FOREACH parameters AS p SEPARATOR ', '»'«((ConstraintRefParameter)p).paramValue.name»'«ENDFOREACH»)«""-»
+«ENDDEFINE»

@@ -1,0 +1,9 @@
+import dommlite;
+
+String dateAndTime() :
+	JAVA dommlite.DOMMLiteUtilities.dateAndTime()
+;
+
+String escape(String this) :
+	JAVA dommlite.DOMMLiteUtilities.escape(java.lang.String)
+;

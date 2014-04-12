@@ -1,0 +1,38 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	Generisanje klasa modela
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/__init__.py"»
+	«ENDFILE»
+	«FILE appName()+"/models.py"-»
+# coding: UTF-8
+# WARNING: This file is generated. DO NOT EDIT! 
+# Generated on «dateAndTime()» from ModelsGen templates
+
+from django.db import models
+from «appName()».models_gen import * 
+	«EXPAND element FOREACH packages»
+
+from «appName()».models_src import post_models_load
+	«ENDFILE»
+«ENDDEFINE»
+
+«DEFINE element FOR Package-»
+
+# Package «name»
+	«EXPAND element FOREACH packageElements.typeSelect(Package)-»
+	«EXPAND element FOREACH packageElements.typeSelect(Entity)-»
+«ENDDEFINE»
+
+«DEFINE element FOR PackageElement-»
+«ENDDEFINE»
+
+«DEFINE element FOR Entity-»
+from «appName()».models_src import «modelName()»
+«ENDDEFINE»
+

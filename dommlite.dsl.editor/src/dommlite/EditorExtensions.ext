@@ -1,0 +1,102 @@
+import dommlite;
+
+extension dommlite::Extensions reexport;
+extension dommlite::GenEditorExtensions reexport;
+
+/*
+ * use this file to overwrite the label() and the image()
+ * extension for your model elements
+ */
+String commaSeparated(List[String] this):
+		this.toString(',')
+;
+
+String label(emf::EObject this) : null;
+
+label(dommlite::Package this) :	defaultLabel(this);
+label(dommlite::Classifier this) :	defaultLabel(this);
+label(dommlite::Entity this) : defaultExtendable(this);
+label(dommlite::ConstraintSpec this) : defaultConstraintSpec(this);
+//label(dommlite::ValidatorParameter this) : defaultValidatorParameter(this);
+label(dommlite::ValueObject this) : defaultExtendable(this);
+label(dommlite::Service this) : defaultExtendable(this);
+label(dommlite::Enumeration this) : defaultLabel(this);
+label(dommlite::Exception this) : defaultLabel(this);
+label(dommlite::FeatureCompartment this) : defaultLabel(this);
+label(dommlite::OperationCompartment this) : defaultLabel(this);
+label(dommlite::Identifier this) :  "Identifier";
+label(dommlite::Operation this) : defaultOperation(this); 
+label(dommlite::Property this) : defaultProperty(this);
+label(dommlite::Parameter this) : defaultProperty(this);
+label(dommlite::EnumerationLiteral this) : defaultLabel(this);
+
+String shortDesc(Object this):
+	metaType.getProperty("shortDesc").get(this)==null ? ""
+		: " [" + metaType.getProperty("shortDesc").get(this) + "] "
+;
+
+String defaultLabel(Object this):
+	metaType.getProperty("name")!=null ? 
+		metaType.getProperty("name").get(this).toString() +
+		shortDesc(this) : null 
+;	
+
+
+String defaultConstraintSpec(dommlite::ConstraintSpec this):
+	this.type.name + 
+	"(" +
+	(this.parameters.collect(e|((String)(e.metaType==ConstraintIntParameter || e.metaType==ConstraintStrParameter ? 
+			((ConstraintIntParameter)e).paramValue : ((NamedElement)((ConstraintRefParameter)e).paramValue).name))).commaSeparated()) 
+	+ ")"
+;
+
+
+String defaultExtendable(Object this):
+	metaType.getProperty("name")!=null ? 
+		metaType.getProperty("name").get(this).toString() +
+		(metaType.getProperty("extends").get(this)!=null ? 
+			"<"+((dommlite::NamedElement)metaType.getProperty("extends").get(this)).name : "") +
+		(((List)metaType.getProperty("depends").get(this)).size>0 ? 
+			"("+((List)metaType.getProperty("depends").get(this)).collect(e|((NamedElement)e).name).commaSeparated()+")" : "") +
+		shortDesc(this) : null 
+;
+
+String defaultProperty(Object this):
+//		metaType.getProperty("name")!=null ? 
+//		metaType.getProperty("name").get(this).toString() +  
+		((NamedElement)this).name!=null ? 
+		((NamedElement)this).name +  
+		multiplicityString((TypedElement)this)
+		 + " : " +
+		((TypedElement)this).type.name + 
+		shortDesc(this) : null
+;	
+
+String defaultOperation(Object this):
+	metaType.getProperty("name")!=null ? 
+		metaType.getProperty("name").get(this).toString() + " (...) : " +
+		((TypedElement)this).type.name + 
+		multiplicityString((TypedElement)this)
+		+ shortDesc(this) : null
+;
+
+String multiplicityString(TypedElement this):
+	many ? "[" + (multiplicity==0 ? "" : multiplicity) + "]" : ""
+;
+
+String image(emf::EObject this) :
+		metaType.name.split("::").get(1) + '.png';
+//	metaType.getProperty("name").debug() ->
+//	metaType.getProperty("name").toString() ->
+
+String image(dommlite::ConstraintSpec this) : 
+	ValidatorType.isAssignableFrom(type.metaType) ?
+			'ValidatorSpec.png' :
+			'TagSpec.png'
+;
+ 
+String image(dommlite::Property this) : 
+	!isReference() ? 'Property.png' :
+		(isBidirectionalReference() ? 'BidirectionalReference.png':'Reference.png')
+;
+ 

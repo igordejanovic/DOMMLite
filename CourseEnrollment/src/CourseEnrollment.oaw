@@ -1,0 +1,6 @@
+<workflow>
+	<component file='dommlite/django/generator.oaw'>
+		<modelFile value='model.dl' />
+		<targetDir value='.' />
+	</component>
+</workflow>

@@ -1,0 +1,113 @@
+<workflow>
+<!--  <property name='modelFile' />
+  <property name='targetDir' value='src-gen/'/>
+  <bean class="org.eclipse.mwe.emf.StandaloneSetup">
+     <platformUri value=".."/>
+  </bean>
+  <component file='dommlite/parser/Parser.oaw'>
+     <modelFile value='${modelFile}'/>
+     <outputSlot value='theModel'/>
+  </component>
+  <component class='oaw.workflow.common.DirectoryCleaner' directory='${targetDir}'/>
+  <component class='oaw.xpand2.Generator'>
+     <metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+     <expand value='dommlite::Main::main FOR theModel'/>
+     <genPath value='${targetDir}'/>
+  </component>
+-->
+
+<!--   <property name='modelFile' /> -->
+  <property name='targetDir' value='./'/>
+  <property name='sourceDir' value='./'/>
+
+  
+  <component file='dommlite/parser/Parser.oaw'>
+     <modelFile value='${modelFile}'/>
+     <outputSlot value='theModel'/>
+  </component>
+
+ <!-- 
+  <component class='oaw.workflow.common.DirectoryCleaner' directories='${targetDir}'/>
+   -->
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::settings::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="false"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::manage::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="false"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::urls::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="false"/>
+  </component>
+
+   
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ModelsGen::main FOR theModel'/>
+	<outlet path="${targetDir}"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ModelsGenBase::main FOR theModel'/>
+	<outlet path="${targetDir}"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ModelsSrc::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="false"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::Admin::main FOR theModel'/>
+	<outlet path="${targetDir}"/>
+  </component>
+
+
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ServicesGen::main FOR theModel'/>
+	<outlet path="${targetDir}"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ServicesSrc::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="false"/>
+  </component>
+ <!-- 
+	 <component class='oaw.xpand2.enerator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ValidatorsGen::main FOR theModel'/>
+	<outlet path="${targetDir}"/>
+  </component>
+-->
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ValidatorsSrc::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="true"/>
+	<prSrcPaths value="${sourceDir}"/>
+	<prExcludes value="*.pyc"/>
+  </component>
+
+  <component class='oaw.xpand2.Generator'>
+	<metaModel id='mm' class='org.eclipse.m2t.type.emf.EmfRegistryMetaModel'/>
+	<expand value='dommlite::django::ModelFields::main FOR theModel'/>
+	<outlet path="${sourceDir}" overwrite="true"/>
+	<prSrcPaths value="${sourceDir}"/>
+	<prExcludes value="*.pyc"/>
+  </component>
+
+
+</workflow>

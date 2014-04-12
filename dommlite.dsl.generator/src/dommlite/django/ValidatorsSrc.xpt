@@ -1,0 +1,22 @@
+«IMPORT dommlite» 
+«IMPORT dommlite::django»
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	User defined validators
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/__init__.py"»
+	«ENDFILE»
+	«FILE appName()+"/validators.py"-»
+# coding: UTF-8
+# This file is generated only once. You shoud manualy define user validator implementations
+from django.forms import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+	«EXPAND ValidatorsGen::validator FOREACH allValidators()»
+	«ENDFILE»
+«ENDDEFINE»
+

@@ -1,0 +1,26 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	Custom model field types
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/custom_fields.py"»
+#-*- coding: utf-8 -*-
+from django.db.models import fields
+from django.utils.translation import gettext_lazy as _
+from django import forms
+
+«EXPAND field FOREACH allElements().typeSelect(UserDataType)»
+	«ENDFILE»
+«ENDDEFINE»
+
+
+«DEFINE field FOR UserDataType»
+«PROTECT CSTART "#" CEND "" ID this.name»
+class «name.toFirstUpper()»Field(fields.CharField):
+	pass
+«ENDPROTECT»
+«ENDDEFINE»

@@ -1,0 +1,22 @@
+import dommlite;
+import codeassist;
+
+extension dommlite::Extensions;
+extension dommlite::EditorExtensions;
+extension dommlite::GenContentAssist reexport;
+
+/*
+ * There are two types of extensions one can define
+ *
+ * completeMetaType_feature(ModelElement ele, String prefix)
+ * This one is called for assignments only. It gets the underlying Modelelement and the current prefix passed in.
+ *
+ * Note that only proposals with 'Proposal.toInsert.toLowerCase().startsWith(prefix.toLowerCase())' will be proposed in the editor
+ * 
+ * you can sort and/or filter the proposals by overwriting 'List[Proposal] sortProposals(List[Proposal] proposalsToSort)'
+ */
+
+List[Proposal] completeProperty_oppositeEnd(emf::EObject ctx, String prefix) :
+	((Property)ctx).type.eContents.typeSelect(Property).select(e|e.type==((Property)ctx).containingEntity()).
+		collect(x|newProposal(x.label(),x.id(),x.image()));
+

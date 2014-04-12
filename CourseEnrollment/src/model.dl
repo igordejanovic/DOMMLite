@@ -1,0 +1,79 @@
+model CourseEnrollment "Course Enrollment"
+dataType phoneNumber
+validatorType mod(_int) appliesTo _prop 
+
+package core "Core package"
+	"This package contains common entities, services and value objects." 
+{
+	
+	entity Student "Student" {
+		ident {
+			// Student's unique identifier (checked by mod 10 formula)
+			prop char[11] SUI [isOnlyDigits,mod(10)] "Student ID" 
+		}
+		
+		// Representation in the GUI.
+		repr firstName + " " + lastName
+		
+		prop char[20] firstName [isOnlyLetters] "First Name"
+		prop char[30] lastName [isOnlyLetters] "Last Name"
+		prop date admissionDate "Date of admission"
+		
+		compartment priorEducation "Prior education" 
+				"Informations about student's prior education"
+		{
+			prop Degree degree "Degree level"
+			prop char[30] discipline [isOnlyLetters] "Discipline"
+			prop char[50] institutionName "Name of the institution"
+			prop date graduationDate "Graduation date"
+		}
+		
+		compartment contactInfo "Contact Information"
+		{
+			prop phoneNumber phone "Phone number"
+			prop char[30] email [isValidEmail] "e-mail"
+			prop char[50] postalAddress "Postal address" 
+		}
+	}
+	
+	enum Degree{
+		NONE "N" "None"
+		BACHELOR "B" "Bachelor"
+		MASTER "M" "Master"
+		PHD "P" "PhD"
+	}
+	
+	entity Country "Country" {
+		ident{
+			prop int code "Country code"
+		}
+	
+	}
+	
+//	entity Enrollment "Enrollment" "Students enrollment in the Seminars"{
+//		ident {
+//			prop Student student "Student"
+//			prop Course course "Course"
+//		}
+		
+//	}
+
+	entity Course  {
+		ident{
+			prop int code "Course code"
+		}
+	}
+	
+	service StudentService 
+		"Student service"
+		"Common operations for Students"{
+		op void enrollStudent(Student student, Course course, 
+								date dateOfEnrollment)
+								"Enroll student to given course"
+		op Student[] getStudentsForCourse(Course course)
+								"Gets students enrolled to given course."
+	
+	}
+	
+	
+}

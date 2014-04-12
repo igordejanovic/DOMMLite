@@ -1,0 +1,63 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«DEFINE operation FOR Operation-»
+def «name»(«IF containingClassifier().metaType==Entity»self, «ENDIF»«FOREACH parameters AS p SEPARATOR ', '»«p.name»«ENDFOREACH»):
+		«IF longDesc!=null-»
+	'''«longDesc»
+	'''
+		«ENDIF-»
+	«IF isValidFinderMethod()-»
+		«EXPAND finder-»
+	«ELSE-»
+	raise NotImplementedError('Operation «containingClassifier().name».«name» has not been implemented yet.')
+	«ENDIF»
+
+«ENDDEFINE»	
+
+«DEFINE operationTabulated FOR Operation-»
+	def «name»(«IF containingClassifier().metaType==Entity»self, «ENDIF»«FOREACH parameters AS p SEPARATOR ', '»«p.name»«ENDFOREACH»):
+		«IF longDesc!=null-»
+		'''«longDesc»
+		'''
+		«ENDIF-»
+	«IF isValidFinderMethod()-»
+		«EXPAND finderTabulated-»
+	«ELSE-»
+		raise NotImplementedError('Operation «containingClassifier().name».«name» has not been implemented yet.')
+	«ENDIF»
+
+«ENDDEFINE»	
+
+
+«DEFINE finder FOR Operation-»
+	«IF many»
+	«type.name».objects.filter(«FOREACH parameters AS p SEPARATOR', '»«EXPAND parameter FOR p»«ENDFOREACH»)
+	«ELSE»
+	«type.name».objects.get(«FOREACH parameters AS p SEPARATOR', '»«p.name»__exact=«p.name»«ENDFOREACH»)
+	«ENDIF»	
+«ENDDEFINE»
+
+«DEFINE finderTabulated FOR Operation-»
+	«IF many»
+	«type.name».objects.filter(«FOREACH parameters AS p SEPARATOR', '»«EXPAND parameter FOR p»«ENDFOREACH»)
+	«ELSE»
+	«type.name».objects.get(«FOREACH parameters AS p SEPARATOR', '»«p.name»__exact=«p.name»«ENDFOREACH»)
+	«ENDIF»	
+«ENDDEFINE»
+
+«DEFINE parameter FOR Parameter-»
+«IF constraints.exists(e|e.type.name=="greaterEqual")-»
+«name»__gte=«name-»
+«ELSEIF constraints.exists(e|e.type.name=="greaterThan")-»
+«name»__gt=«name-»
+«ELSEIF constraints.exists(e|e.type.name=="lessEqual")-»
+«name»__lte=«name-»
+«ELSEIF constraints.exists(e|e.type.name=="lessThan")-»
+«name»__lt=«name-»
+«ELSE-»
+«name»__exact=«name-»
+«ENDIF-»
+«ENDDEFINE»

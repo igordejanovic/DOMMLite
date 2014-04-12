@@ -1,0 +1,22 @@
+import dommlite;
+import tree;
+
+extension dommlite::Extensions;
+extension dommlite::EditorExtensions;
+extension dommlite::GenNavigation reexport;
+
+/*
+ * overwrite the extensions
+ * ''emf::EObject findDeclaration(String,Object,Object)''
+ * ''List[emf::EObject] findReferences(String,Object,Object)''
+ * from dommlite::GenNavigation.ext to control the construction of the findReferences / findDeclaration actions
+ */
+findDeclaration(String s,xtext::Assignment ass, Property ele) :
+	switch (ass.feature) {
+		case "type" : allElements(ele).typeSelect(Classifier).select(e|e.id()==s).first()
+		default : null
+	};
+
+ List[UIContentNode] findReferences(String s,xtext::Assignment rule, Classifier ele) :
+	allElements(ele).typeSelect(Property).select(e|e.type.name==s).collect(e|e.createContentNode(e.label(),e.image()));
+ 

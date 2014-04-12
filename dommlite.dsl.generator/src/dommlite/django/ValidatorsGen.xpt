@@ -1,0 +1,368 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	BuildIn validators
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"_gen/__init__.py"»
+	«ENDFILE»
+	«FILE appName()+"_gen/validators.py"-»
+# coding: UTF-8
+# WARRNING: This file is generated. DO NOT EDIT! 
+# Generated on «dateAndTime()» from ValidatorsGen template
+
+from django.core import validators
+from datetime import datetime
+import settings
+
+
+def isCommaSeparatedEmailList(field_data, all_data):
+	validators.isCommaSeparatedEmailList(field_data, all_data)
+
+def isValidImageURL(field_data, all_data):
+	validators.isValidImageURL(field_data, all_data)
+
+def isLowerCase(field_data, all_data):
+	validators.isLowerCase(field_data, all_data)
+
+def isAlphaNumeric(field_data, all_data):
+	validators.isAlphaNumeric(field_data, all_data)
+
+def isOnlyLetters(field_data, all_data):
+	validators.isOnlyLetters(field_data, all_data)
+
+def isValidURL(field_data, all_data):
+	validators.isValidURL(field_data, all_data)
+
+def isOnlyDigits(field_data, all_data):
+	validators.isOnlyDigits(field_data, all_data)
+
+def isValidEmail(field_data, all_data):
+	validators.isValidEmail(field_data, all_data)
+
+def isCommaSeparatedIntegerList(field_data, all_data):
+	validators.isCommaSeparatedIntegerList(field_data, all_data)
+
+def isExistingURL(field_data, all_data):
+	validators.isExistingURL(field_data, all_data)
+
+def isNotOnlyDigits(field_data, all_data):
+	validators.isNotOnlyDigits(field_data, all_data)
+
+def isWellFormedXml(field_data, all_data):
+	validators.isWellFormedXml(field_data, all_data)
+
+def isWellFormedXmlFragment(field_data, all_data):
+	validators.isWellFormedXmlFragment(field_data, all_data)
+
+def isValidImage(field_data, all_data):
+	validators.isValidImage(field_data, all_data)
+
+def isUpperCase(field_data, all_data):
+	validators.isUpperCase(field_data, all_data)
+
+def isValidHTML(field_data, all_data):
+	validators.isValidHTML(field_data, all_data)
+
+def matchesRegularExpression(param0_str):
+	return validators.MatchesRegularExpression(param0_str)
+
+def get_date_from_string(date_str):
+	if not hasattr(settings, "DATE_FORMAT_STRPTIME"):
+		date_format = "%Y-%m-%d"
+	else:
+		date_fromat = settings.DATE_FORMAT_STRPTIME
+
+	return datetime.strptime(date_str, date_format)
+
+def isGreaterThanRef (other_labels=None, other_fields=None):
+	def _isGreaterThanRef(field_data, all_data):
+		ref_value_str=all_data.get(other_fields[0],'')
+		try:
+			ref_value = float(ref_value_str)
+			field_value = float(field_data)
+		except ValueError:
+			# Ref value is not entered or types are not float
+			# Try dates
+			try:
+				ref_value = get_date_from_string(ref_value_str)
+				field_value = get_date_from_string(field_data)
+			except ValueError:
+				# Ref value is not entered or types are not dates
+				return
+			
+		if not (field_value > ref_value):
+			raise validators.ValidationError(
+					'Vrednost mora biti veća od vrednosti u polju "%s"' % 
+						(other_labels and other_labels or other_fields[0]))
+		
+	return _isGreaterThanRef
+
+def isLessThanRef (other_labels=None, other_fields=None):
+	def _isLessThanRef(field_data, all_data):
+		ref_value_str=all_data.get(other_fields[0],'')
+		try:
+			ref_value = float(ref_value_str)
+			field_value = float(field_data)
+		except ValueError:
+			# Ref value is not entered or types are not float
+			# Try dates
+			try:
+				ref_value = get_date_from_string(ref_value_str)
+				field_value = get_date_from_string(field_data)
+			except ValueError:
+				# Ref value is not entered or types are not dates
+				return
+			
+		if not (field_value < ref_value):
+			raise validators.ValidationError(
+					'Vrednost mora biti manja od vrednosti u polju "%s"' % 
+						(other_labels and other_labels or other_fields[0]))
+		
+	return _isLessThanRef
+
+
+
+def isGreaterOrEqualThanRef (other_labels=None, other_fields=None):
+	def _isGreaterOrEqualThanRef(field_data, all_data):
+		ref_value_str=all_data.get(other_fields[0],'')
+		try:
+			ref_value = float(ref_value_str)
+			field_value = float(field_data)
+		except ValueError:
+			# Ref value is not entered or types are not float
+			# Try dates
+			try:
+				ref_value = get_date_from_string(ref_value_str)
+				field_value = get_date_from_string(field_data)
+			except ValueError:
+				# Ref value is not entered or types are not dates
+				return
+			
+		if not (field_value >= ref_value):
+			raise validators.ValidationError(
+					'Vrednost mora biti veća ili jednaka od vrednosti u polju "%s"' % 
+						(other_labels and other_labels or other_fields[0]))
+		
+	return _isGreaterOrEqualThanRef
+
+def isLessOrEquealThanRef (other_labels=None, other_fields=None):
+	def _isLessOrEquealThanRef(field_data, all_data):
+		ref_value_str=all_data.get(other_fields[0],'')
+		try:
+			ref_value = float(ref_value_str)
+			field_value = float(field_data)
+		except ValueError:
+			# Ref value is not entered or types are not float
+			# Try dates
+			try:
+				ref_value = get_date_from_string(ref_value_str)
+				field_value = get_date_from_string(field_data)
+			except ValueError:
+				# Ref value is not entered or types are not dates
+				return
+			
+		if not (field_value <= ref_value):
+			raise validators.ValidationError(
+					'Vrednost mora biti manja ili jednaka od vrednosti u polju "%s"' % 
+						(other_labels and other_labels or other_fields[0]))
+		
+	return _isLessOrEquealThanRef
+
+def isBetweenRefsInclusive (other_labels=None, other_fields=None):
+	def _isBetweenRefsInclusive(field_data, all_data):
+		ref1_value_str=all_data.get(other_fields[0],'')
+		ref2_value_str=all_data.get(other_fields[1],'')
+		try:
+			ref1_value = float(ref1_value_str)
+			ref2_value = float(ref2_value_str)
+			field_value = float(field_data)
+		except ValueError:
+			# Ref value is not entered or types are not float
+			# Try dates
+			try:
+				ref1_value = get_date_from_string(ref1_value_str)
+				ref2_value = get_date_from_string(ref2_value_str)
+				field_value = get_date_from_string(field_data)
+			except ValueError:
+				# Ref value is not entered or types are not dates
+				return
+			
+		if not (ref1_value <= field_value <= ref2_value):
+			raise validators.ValidationError(
+					'Vrednost mora biti u intervalu vrednosti iz polja ["%s"]' % 
+						(other_labels and other_labels or other_fields[0]+other_fields[1]))
+		
+	return _isBetweenRefsInclusive
+
+
+def isBetweenRefsExclusive (other_labels=None, other_fields=None):
+	def _isBetweenRefsExclusive(field_data, all_data):
+		ref1_value_str=all_data.get(other_fields[0],'')
+		ref2_value_str=all_data.get(other_fields[1],'')
+		try:
+			ref1_value = float(ref1_value_str)
+			ref2_value = float(ref2_value_str)
+			field_value = float(field_data)
+		except ValueError:
+			# Ref value is not entered or types are not float
+			# Try dates
+			try:
+				ref1_value = get_date_from_string(ref1_value_str)
+				ref2_value = get_date_from_string(ref2_value_str)
+				field_value = get_date_from_string(field_data)
+			except ValueError:
+				# Ref value is not entered or types are not dates
+				return
+			
+		if not (ref1_value < field_value < ref2_value):
+			raise validators.ValidationError(
+					'Vrednost mora biti u intervalu vrednosti iz polja ("%s")' % 
+						(other_labels and other_labels or other_fields[0]+other_fields[1]))
+		
+	return _isBetweenRefsExclusive
+
+def emptyIfRefsEmpty (other_labels=None, other_fields=None):
+	def _isEmptyIfRefsEmpty(field_data, all_data):
+		all_refs_values = "".join([all_data.get(ref_name,'') for ref_name in other_fields])
+		if (all_refs_values.strip()=='') and field_data.strip()!='':
+			raise validators.ValidationError(
+					'Polje mora biti prazno ukoliko su prazna polja "%s".' %
+							 (other_labels and other_labels or ",".join(other_fields)))
+			 		
+	return _isEmptyIfRefsEmpty
+
+
+def emptyIfRefsNotEmpty (other_labels=None, other_fields=None):
+	def _isEmptyIfRefsNotEmpty(field_data, all_data):
+		all_refs_values = "".join([all_data.get(ref_name,'') for ref_name in other_fields])
+		if (all_refs_values.strip()!='') and field_data.strip()!='':
+			raise validators.ValidationError(
+					'Polje mora biti prazno ukoliko polja "%s" nisu prazna.' % 
+							 (other_labels and other_labels or ",".join(other_fields)))
+		
+	return _isEmptyIfRefsNotEmpty
+
+def notEmptyIfRefsEmpty (other_labels=None, other_fields=None):
+	def _isNotEmptyIfRefsNotEmpty(field_data, all_data):
+		all_refs_values = "".join([all_data.get(ref_name,'') for ref_name in other_fields])
+		if (all_refs_values.strip()=='') and field_data.strip()=='':
+			raise validators.ValidationError(
+					'Polje ne sme biti prazno ukoliko su polja "%s" prazna.' % 
+							 (other_labels and other_labels or ",".join(other_fields)))
+							 
+	_isNotEmptyIfRefsNotEmpty.always_test = True
+	return _isNotEmptyIfRefsNotEmpty
+
+
+def notEmptyIfRefsNotEmpty (other_labels=None, other_fields=None):
+	def _isNotEmptyIfRefsNotEmpty(field_data, all_data):
+		all_refs_values = "".join([all_data.get(ref_name,'') for ref_name in other_fields])
+		if (all_refs_values.strip()!='') and field_data.strip()=='':
+			raise validators.ValidationError(
+					'Polje ne sme biti prazno ukoliko polja "%s" nisu prazna.' %
+							 (other_labels and other_labels or ",".join(other_fields)))
+
+	_isNotEmptyIfRefsNotEmpty.always_test = True
+	return _isNotEmptyIfRefsNotEmpty
+
+
+def isGreaterThanInt (param0_int):
+	def _isGreaterThanInt(field_data, all_data):
+		try:
+			fd = float(field_data)
+		except ValueError:
+			return
+		
+		if not (fd>param0_int):
+			raise validators.ValidationError(
+					'Vrednost mora biti veća od %s' % param0_int)
+		
+	return _isGreaterThanInt
+
+def isLessThanInt (param0_int):
+	def _isLessThanInt(field_data, all_data):
+		try:
+			fd = float(field_data)
+		except ValueError:
+			return
+		
+		if not (fd<param0_int):
+			raise validators.ValidationError(
+					'Vrednost mora biti manja od %s' % param0_int)
+
+		
+	return _isLessThanInt
+
+
+def isGreaterOrEqualThanInt (param0_int):
+	def _isGreaterOrEqualThanInt(field_data, all_data):
+		try:
+			fd = float(field_data)
+		except ValueError:
+			return
+		
+		if not (fd>=param0_int):
+			raise validators.ValidationError(
+					'Vrednost mora biti veća ili jednaka %s' % param0_int)
+
+		
+	return _isGreaterOrEqualThanInt
+
+
+def isLessOrEqualThanInt (param0_int):
+	def _isLessOrEqualThanInt(field_data, all_data):
+		try:
+			fd = float(field_data)
+		except ValueError:
+			return
+		
+		if not (fd<=param0_int):
+			raise validators.ValidationError(
+					'Vrednost mora biti manja ili jednaka %s' % param0_int)
+
+		
+	return _isLessOrEqualThanInt
+
+def isBetweenIntsInclusive (param0_int, param1_int):
+	def _isBetweenIntsInclusive(field_data, all_data):
+		try:
+			fd = float(field_data)
+		except ValueError:
+			return 
+		
+		if not (fd<=param1_int and fd>=param0_int):
+			raise validators.ValidationError(
+					'Vrednost mora biti u intervalu [%d,%d]' % (param0_int, param1_int))
+						
+	return _isBetweenIntsInclusive
+
+def isBetweenIntsExclusive (param0_int, param1_int):
+	def _isBetweenIntsExclusive(field_data, all_data):
+		try:
+			fd = float(field_data)
+		except ValueError:
+			return
+		
+		if not (fd<param1_int and 
+			    fd >param0_int):
+			raise validators.ValidationError(
+					'Vrednost mora biti u intervalu (%d,%d)' % (param0_int, param1_int))
+					
+	return _isBetweenIntsExclusive
+
+# -----------------------  User defined validators ----------------------------
+	«EXPAND validator FOREACH userValidators()»
+	«ENDFILE»
+«ENDDEFINE»
+
+«DEFINE validator FOR ValidatorType»
+«PROTECT CSTART "#" CEND "" ID this.name DISABLE»
+def «name»(value, «validatorTypeFormalParamsString()»):
+	raise ValidationError(_(u'Validator "«name»" is applied to this field but is not defined yet.'))
+«ENDPROTECT»
+«ENDDEFINE»
+

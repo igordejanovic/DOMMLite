@@ -1,0 +1,95 @@
+«IMPORT dommlite» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+«REM»
+	Admin support
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"/admin.py"-»
+# -*- coding: utf-8 -*-
+# WARNING: This file is generated. DO NOT EDIT! 
+# Generated on «dateAndTime()» from ModelsGen templates
+
+from django import forms
+from datetime import date
+from django.forms.util import ValidationError
+from django.conf.urls.defaults import patterns
+from django.db import models
+from django.contrib import admin
+from «appName()».models import «FOREACH allEntities() AS ent SEPARATOR ','»«ent.name»«ENDFOREACH»
+from «appName()».validators import *
+
+«EXPAND adminClass FOREACH allEntities()»
+«FOREACH allEntities() AS ent-»
+admin.site.register(«ent.name», «ent.name»Admin)
+«ENDFOREACH»
+«ENDFILE»	
+«ENDDEFINE»
+
+«REM»
+****************************************************************************************
+Admin class and admin form class definitions
+****************************************************************************************
+«ENDREM»
+«DEFINE adminClass FOR Entity»
+class «name»AdminForm(forms.ModelForm):
+	class Meta:
+		model = «name»
+«FOREACH allPropertiesWithKeyFields() AS prop-»
+	«IF !prop.allConstraints().isEmpty-»
+	
+	def clean_«prop.name»(self):
+		«prop.name» = self.cleaned_data['«prop.name»']
+		«FOREACH prop.eContents.typeSelect(ConstraintSpec).select(e|ValidatorType.isAssignableFrom(e.type.metaType)) AS validator-»
+		«validator.type.name»(«prop.name»«IF !validator.parameters.isEmpty»,«ENDIF»«EXPAND validatorParam FOREACH validator.parameters»)		
+		«ENDFOREACH-»
+		return «prop.name»
+	«ENDIF-»
+«ENDFOREACH-»
+
+class «name»Admin(admin.ModelAdmin):
+	form = «name»AdminForm
+	«IF this.featureCompartments.size>0-»
+	fieldsets = (
+        (None, {
+        	«IF longDesc!=null»'description' : u'«longDesc.escape()»',«ENDIF»
+            'fields': («thisSideFieldNames()»,)
+        }),
+      	«FOREACH featureCompartments AS fc SEPARATOR ','»
+        ('«fc.shortDesc.escape()»', {
+        	«IF fc.longDesc!=null»'description' : u'«fc.longDesc.escape()»',«ENDIF-»
+            'classes': 'wide',
+            'fields' : («fc.thisSideFieldNames()»,)
+        })
+        «ENDFOREACH»
+    )
+	«ENDIF-»
+	«IF allPropertiesWithKeyFields().select(e|e.type.metaType==Enumeration).size>0-»
+	radio_fields = {
+		«FOREACH allPropertiesWithKeyFields().select(e|e.type.metaType==Enumeration) AS prop-»
+			«IF ((Enumeration)prop.type).literals.size<=5-»
+				"«prop.name»" : admin.HORIZONTAL,
+			«ENDIF»
+		«ENDFOREACH»
+	}
+	«ENDIF»
+	«IF allConstraints().exists(e|e.type.name=="searchBy")-»
+	search_fields = [«FOREACH allConstraints().selectFirst(e|e.type.name=="searchBy").parameters AS p SEPARATOR ','»'«((ConstraintRefParameter)p).paramValue.name»'«ENDFOREACH»]
+	«ELSEIF allPropertiesWithKeyFields().allStringLikeProperties().size>0-»
+	search_fields = [«FOREACH allPropertiesWithKeyFields().allStringLikeProperties() AS p SEPARATOR ','»'«p.name»'«ENDFOREACH»]		
+	«ENDIF-»
+	«IF allConstraints().exists(e|e.type.name=="listFields")-»
+	list_display = [«FOREACH allConstraints().selectFirst(e|e.type.name=="listFields").parameters AS p SEPARATOR ','»'«((ConstraintRefParameter)p).paramValue.name»'«ENDFOREACH»]
+	«ENDIF-»
+	«IF allConstraints().exists(e|e.type.name=="filterFields")-»
+	list_filter = [«FOREACH allConstraints().selectFirst(e|e.type.name=="filterFields").parameters AS p SEPARATOR ','»'«((ConstraintRefParameter)p).paramValue.name»'«ENDFOREACH»]
+	«ENDIF-»
+	pass
+«ENDDEFINE»
+
+«DEFINE validatorParam FOR ConstraintParameter»«ENDDEFINE»
+«DEFINE validatorParam FOR ConstraintIntParameter»«paramValue»«ENDDEFINE»
+«DEFINE validatorParam FOR ConstraintStrParameter»'«paramValue»'«ENDDEFINE»
+«DEFINE validatorParam FOR ConstraintRefParameter»self.«paramValue.name»«ENDDEFINE»

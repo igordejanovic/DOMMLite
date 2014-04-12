@@ -1,0 +1,10 @@
+.*
+!/.gitignore
+!.classpath
+!.project
+bin
+*.class
+*.pyc
+*-gen
+CourseEnrollment/course_enrollment.db
+

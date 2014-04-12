@@ -1,0 +1,56 @@
+«IMPORT dommlite»
+«IMPORT dommlite::django» 
+«EXTENSION dommlite::Utilities» 
+«EXTENSION dommlite::Extensions» 
+«EXTENSION dommlite::django::DjangoUtilities» 
+
+
+«REM»
+	Generisanje klasa modela
+«ENDREM»
+«DEFINE main FOR DOMMLiteModel»
+	«FILE appName()+"_gen/services/__init__.py"-»
+	«ENDFILE»
+	«EXPAND element FOREACH packages-»
+«ENDDEFINE»
+
+«DEFINE element FOR Package-»
+	«EXPAND element FOREACH packageElements.typeSelect(Package)-»
+	«EXPAND element FOREACH packageElements.typeSelect(Service)-»
+«ENDDEFINE»
+
+«DEFINE element FOR PackageElement»
+«ENDDEFINE»
+
+«DEFINE element FOR Service»
+	«FILE appName()+"_gen/services/"+serviceFileName()-»
+# coding: UTF-8
+# WARRNING: This file is generated. DO NOT EDIT! 
+# Service «name»
+# Generated on «dateAndTime()» from Services templates
+
+from dommlite import service_registry, Service
+
+«serviceName()»_service = Service('«appName()»','«serviceName()»','«shortDescOrName()»')
+ 
+	«EXPAND ServiceOperationGen FOREACH operations»
+	«EXPAND compartment FOREACH operationCompartmens-»
+
+service_registry.register_service('«serviceName()»', «serviceName()»_service)
+	«ENDFILE»
+«ENDDEFINE»
+
+«DEFINE ServiceOperationGen FOR Operation»
+	«EXPAND Operations::operation»
+
+«containingServiceName()»_service.register_function(«name», '«name»', '«shortDesc»', «EXPAND parametersDescription-», '''«longDesc»''')
+		
+«ENDDEFINE»
+
+«DEFINE parametersDescription FOR Operation-»None«ENDDEFINE»
+
+«DEFINE compartment FOR OperationCompartment»
+# --------------    Start of operation compartment «name»    -----------------------------------
+	«EXPAND ServiceOperationGen FOREACH operations»
+# --------------    End of operation compartment «name»    -----------------------------------
+«ENDDEFINE»

@@ -1,0 +1,296 @@
+/* Utility extensions for Django code generation
+ * Author: igord
+ */
+import dommlite;
+
+extension org::openarchitectureware::util::stdlib::io;
+extension dommlite::Extensions;
+
+
+String camelCaseToUnderscores(String this):
+	JAVA dommlite.django.DjangoUtilities.camelCaseToUnderscores(java.lang.String)
+;
+
+
+// Application name is deduced from the model name transforming CamelCase name to underscore based name
+String appName(emf::EObject this):
+	((DOMMLiteModel)eRootContainer).name.camelCaseToUnderscores()
+;
+
+
+//Mapping DOMMLite primitive types to Django Fields
+String toDjangoField(dommlite::Property d) :
+	switch(d.type.name){
+				case "date": "DateField"
+				case "datetime": "DateTimeField"
+				case "string" : "TextField"
+				case "char" : "CharField"
+				case "int" : "IntegerField"
+				case "real" : "FloatField"
+				case "money" : "FloatField"
+				case "bool" : "BooleanField"
+				default: d.type.name.toFirstUpper()
+	}
+
+;
+
+// ====================================   Validators  ===========================================
+
+String validatorsPackage(emf::EObject this):
+	appName() + ".validators"
+;
+cached List[UserValidatorType] userValidators(DOMMLiteModel this) :
+	eAllContents.select(e|UserValidatorType.isAssignableFrom(e.metaType))
+;
+
+cached List[ValidatorType] usedValidators(DOMMLiteModel this) :
+	eAllContents.select(e|e.metaType==ConstraintSpec).
+		select(e|ValidatorType.isAssignableFrom(((ConstraintSpec)e).type.metaType)).
+		collect(e|((ConstraintSpec)e).type).toSet()
+;
+
+cached String usedValidatorsString(DOMMLiteModel this) :
+	usedValidators().collect(e|e.name).toString(", ")
+;
+
+cached List[ValidatorType] allValidators(DOMMLiteModel this) :
+	eAllContents.select(e|ValidatorType.isAssignableFrom(e.metaType))
+;
+
+cached List[UserValidatorType] allUserValidators(DOMMLiteModel this) :
+	eAllContents.select(e|UserValidatorType.isAssignableFrom(e.metaType))
+;
+
+cached String allValidatorsString(DOMMLiteModel this) :
+	allValidators().collect(e|e.name).toString(", ")
+;
+
+String validatorTypeFormalParamsString(ValidatorType this):
+		parameters.exists(e|e.toString()=="ref") ?
+			"other_labels=None, other_fields=None"
+		:
+			((parameters.exists(e|e.toString()=="ellipsis") ?
+				"*params"
+			:	
+				parameters.collect(e|
+					let pos = parameters.indexOf(e) :
+					switch(e.toString()){
+						case "int": "param" + pos + "_int"
+						case "ref": "param" + pos + "_ref"
+						case "string": "param" + pos + "str"
+						default: "*param"+pos
+					}
+				).toString(", "))
+			)
+;
+
+String validatorParametersString(ConstraintSpec this):
+	// If there is reference parameter than we use named parameters to support other_labels
+	parameters.exists(e|e.metaType==ConstraintRefParameter) ?
+		"other_labels=" + "'"+parameters.select(e|e.metaType==ConstraintRefParameter).
+			collect(e|((ConstraintRefParameter)e).paramValue.shortDesc).toString(",")+ "', " + 
+		"other_fields= [" +
+			validatorParameterValuesString() + 
+		"]"
+	: 
+		validatorParameterValuesString()
+;
+
+String validatorParameterValuesString(ConstraintSpec this):
+	parameters.collect(e|
+		switch(e.metaType) {
+			case ConstraintIntParameter: ((ConstraintIntParameter)e).paramValue.toString()
+			case ConstraintRefParameter: "'" + ((ConstraintRefParameter)e).paramValue.name + "'"
+			case ConstraintStrParameter: "'"+ ((ConstraintStrParameter)e).paramValue.toString() + "'"
+			default: ""
+		} 
+	).toString(",")
+;
+
+
+// ====================================   Packages  ===========================================
+
+String fullyQualifiedPackageName(dommlite::PackageElement this):
+//	info("fullyQualifiedPackageName -- " + elem.owner.metaType) ->
+	(this.eContainer!=null && this.eContainer.metaType==dommlite::Package) ?
+		fullyQualifiedPackageName((dommlite::Package)eContainer):"";
+
+private String fullyQualifiedPackageName(dommlite::Package p):
+	(p.eContainer!=null && p.eContainer.metaType==dommlite::Package) ?
+		fullyQualifiedPackageName((dommlite::PackageElement)p.eContainer)+"."+p.name : p.name;
+		
+		
+String fullyQualifiedPackagePath(dommlite::PackageElement elem):
+//	info("fullyQualifiedPackavogeName -- " + elem.name + " -- " + fullyQualifiedPackageName(elem).replaceAll("\\.","/")) ->
+//	info("owner -> " + elem.owner.name) ->
+//	packageNameToPath(fullyQualifiedPackageName(elem));
+	fullyQualifiedPackageName(elem).replaceAll("\\.","/");
+
+
+// ====================================   Entities  ===========================================
+
+String modelFileName(Entity this) :
+	name.camelCaseToUnderscores()+".py"
+;
+
+String modelName(Entity this) :
+	name.camelCaseToUnderscores()
+;
+
+String verbose_name(NamedElement this):
+	'verbose_name=u"' + (shortDesc!=null ? shortDesc : name).toFirstUpper() + '"'
+;
+
+String related_name(Property this):
+	(isBidirectionalReference()) ?
+	', related_name="' + oppositeEnd().name+'"' : ', related_name="' + containingEntityName().toFirstLower() + "_" + this.name + '_set"' 
+;
+
+String fieldParameters(Property this):
+	let params = { nullAndBlank(), unique(), max_length(),/* editable(),*/ help_text() }.select(e|(e!="" && e!=null)).toString(",") :
+		(params != "" ? ", " + params : params)
+;
+
+String fieldParametersOtherSide(Property this):
+	containment  ?  "" : ", null=True, blank=True"
+;
+
+
+String nullAndBlank(Property this):
+	eContainer.metaType==dommlite::Identifier ? 
+		"": // default ", null=False, blank=False"
+		(type.name=="char" || type.name=="string" ? 
+			(!required ? "blank=True" : "") :
+			(!required  ?  "null=True, blank=True":"")
+		)
+;
+
+String unique(Property this):
+	(unique ||(eContainer.metaType==dommlite::Identifier && 
+		((Identifier)eContainer).properties.size==1) &&
+		containmentReferenceName(containingEntity())==null) ? "unique=True" : "" 
+;
+
+String help_text(Property this):
+	longDesc==null ? "" : "help_text='" + longDesc + "'"
+;
+
+String editable(Property this):
+	readonly ? "editable=False" : ""
+;
+
+String validator_list(Property this):
+	constraints.exists(e|ValidatorType.isAssignableFrom(e.type.metaType)) ?
+		"validator_list=[" + constraints.select(e|ValidatorType.isAssignableFrom(e.type.metaType)).
+			collect(e|e.validator_instance_name()).toString(",")  + "]"
+		: ""
+;
+
+String validator_instance_name(ConstraintSpec this):
+	parameters.size>0 ? 
+		eContainer.containingClassifier().name.toFirstLower() + "_" + ((NamedElement)eContainer).name + "_" + type.name
+	: validatorsPackage() + "." + type.name
+;
+
+
+String max_length(Property this) :
+	multiplicity > 0 ? 'max_length=' + multiplicity : ""
+;
+
+
+// Name of the field representing this side link to containing Entity at model level.
+// Used for generating unique constraints in respect to global and local business key. 
+cached String containmentReferenceName(dommlite::Entity this):
+	otherSideFieldName(eRootContainer.eAllContents.typeSelect(Property).selectFirst(e|e.containment && e.type==this))
+;
+
+cached String uniqueTogetherFieldNames(dommlite::Entity this):
+	let c = key.properties.collect(e|"'" + e.name + "'") :
+		containmentReferenceName() == null ? 
+				c.toString(',')
+			: 
+				{c,"'" + containmentReferenceName() + "'"}.flatten().toString(',')
+;
+
+// Names of all fields generated in this entity (django model)
+String thisSideFieldNames(Entity this) :
+	{ thisSideFields().collect(e|"'"+((Property)e).name+"'"),
+		allOtherSideReferenceFields().collect(e|"'"+((Property)e).otherSideFieldName() + "'")}.flatten().toString(",") 
+;
+
+// Name of the reference field for references generated from other side in DOMMLite model. e.g. Collection from other side results in 
+// this side ForeignKey. 
+String otherSideFieldName(Property this) :
+	containingEntity().name.toFirstLower() + "_" + name.toFirstLower()
+;
+
+String thisSideFieldNames(FeatureCompartment this) :
+	thisSideFields().collect(e|"'"+e.name+"'").toString(",")
+;
+
+
+List[Property] thisSideFields(Entity this) :
+	{key.properties, properties().select(e|e.isThisSideField())}.flatten()
+;
+
+thisSideFields(FeatureCompartment this) :
+	properties().select(e|e.isThisSideField())
+;
+
+Boolean isThisSideField(Property this) :
+//	(this.name + ' - ' + isManyToMany()+ ' - ' + hasTag('dj_thisSide')).syserr() ->
+	!isReference() || (isOneToMany() && !many)
+	|| (isManyToMany() && hasTag('dj_thisSide')) 
+	
+//	|| (isManyToMany() && (this.name < this.oppositeEnd.name)) // TODO: Fix this nasty hack. Maybe with django specific tag 
+;
+
+cached List[Property] allThisSideReferenceFields(Entity this) :
+	{ thisSideFields(), featureCompartments.thisSideFields()}.flatten().select(e|((Property)e).isReference())
+;
+
+cached List[Property] allOtherSideReferenceFields(Entity this):
+	allOtherSideReferenceProperties().select(e|e.isOneToMany() && e.many && !e.isBidirectionalReference())
+;
+/*
+cached List[Property] allReferences(Entity this):
+	allOtherSideReferenceProperties().select(e|e.isOneToMany() && e.many && !e.isBidirectionalReference())
+;
+*/
+cached List[ConstraintSpec] allEntityPropertiesValidatorSpec(Entity this) :
+	eAllContents.select(e|e.metaType==ConstraintSpec).
+		select(e|ValidatorType.isAssignableFrom(((ConstraintSpec)e).type.metaType))
+;
+
+// ====================================   Services  ===========================================
+
+String serviceFileName(Service this) :
+	name.camelCaseToUnderscores()+".py"
+;
+
+String serviceName(Service this) :
+	name.camelCaseToUnderscores()
+;
+
+// ====================================   Operations  ===========================================
+
+cached Boolean isValidFinderMethod(Operation this):
+	// Is this method marked as finder
+	constraints.exists(e|e.type.name=='finder') ?
+		// Is return type enity 
+		(type.metaType==Entity ?
+			// Parameters names and types check
+			parameters.forAll(e|((Entity)type).allPropertiesWithKeyFields().
+				exists(e2|e2.name==e.name && e2.type==e.type)) 
+		:
+			false
+		)
+	:
+		false
+;
+
+// ====================================   ValueObjects  ===========================================
+
+
+////////////////////////////////////////////
+

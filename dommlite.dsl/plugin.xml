@@ -1,0 +1,12 @@
+<plugin>
+   
+   
+   
+   <extension
+         point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            class="dommlite.resource.dommliteResourceFactory"
+            type="dl">
+      </parser>
+   </extension>
+</plugin>
